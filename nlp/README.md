@@ -32,7 +32,7 @@ python try_keywords2vec.py -n episte_30000 -p"obesity"
 
 | index | term                        | score count    |     |
 |-------|-----------------------------|----------------|-----|
-| 0     | overweight                  | 0.500965   297 |     |
+| 0     | overweight                  | 0.500965       | 297 |
 | 1     | obese individuals           | 0.479940       | 15  |
 | 2     | obese                       | 0.470804       | 152 |
 | 3     | hypertension                | 0.444629       | 838 |
