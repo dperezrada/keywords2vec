@@ -23,7 +23,7 @@ def tokenize_one(text, stopwords=None, additional_stopwords=None, lang="en"):
     # Must be executed in order
     regexs = [
         # Remove all stopwords by a !, we are searching for the stopword (bounded)
-        ("\\b" + "\\b|\\b".join(stopwords), "!"),
+        ("\\b" + "\\b|\\b".join(stopwords), "!!"),
         ("’", "'"),
         # Remove all non alpha, numeric, spaces, - or single quote
         (r'([^a-z0-9\u00C0-\u1FFF\u2C00-\uD7FF \t\n\-\'])', "!!"),

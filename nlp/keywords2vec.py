@@ -16,9 +16,9 @@ def main():
         required=True, help="the input text file", metavar="INPUT_FILE"
     )
     parser.add_argument(
-        "-c", "--column-number", dest="column_number",
-        required=False, help="the column to read the text. (starting from 0)",
-        metavar="COLUM_NUMBER", default="1", type=int
+        "-c", "--column-numbers", dest="column_numbers",
+        required=False, help="The text columns of the file. Allowed multiple, separed by comma (starting from 0)",
+        metavar="COLUM_NUMBERS", default="0", type=str
     )
     parser.add_argument(
         "-d", "--delimiter", dest="delimiter", required=False,
@@ -103,7 +103,7 @@ def main():
     step += 1
 
     log("Step%s: Calculate frequency" % step, args.verbose)
-    counter, counter_frame = calculate_keywords_frequency(documents_keywords)
+    counter, _ = calculate_keywords_frequency(documents_keywords)
     step += 1
 
     log("Step%s: Generate word2vec model" % step, args.verbose)
@@ -164,7 +164,14 @@ def chunk_of_text(_file, chunk_size, args):
         line = _file.readline()
         if not line:
             break
-        for sentence in line.lower()[:-1].split(args.delimiter)[args.column_number].split("."):
+        tmp_text_parts = line.lower()[:-1].split(args.delimiter)
+        selected_text_parts = ". ".join([
+            tmp_text_parts[int(col_numb)] + ". "
+            for col_numb in args.column_numbers.split(",")
+        ])
+        del tmp_text_parts
+
+        for sentence in selected_text_parts.split("."):
             if sentence.strip():
                 yield sentence.strip()
         if index >= chunk_size:

@@ -34,7 +34,7 @@ def main():
     keywords_vectors = load_vectors(store_model_path)
 
     counter_store_path = os.path.join(args.experiment_path, "keywords_counter.tsv")
-    counter, counter_frame = load_counter(counter_store_path)
+    _, counter_frame = load_counter(counter_store_path)
     try_model(
         keywords_vectors, counter_frame,
         args.positive.split(","), args.negative.split(","), total_results=25
