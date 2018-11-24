@@ -84,7 +84,7 @@ def main():
         "--workers", dest="workers",
         required=False,
         help="Total numbers of CPU workers",
-        metavar="WORD2VEC_EPOCHS", default="4", type=int
+        metavar="CPU_WORKERS", default="4", type=int
     )
     args = parser.parse_args()
     args.experiment_path = os.path.join(args.output_directory, args.name)
@@ -95,8 +95,13 @@ def main():
 
     step = 1
     log("Step%s: Tokenizing" % step, args.verbose)
-    tokenized_path = tokenize_text(args)
+    tokenized_path = os.path.join(args.experiment_path, "tokenized.txt.gz")
+    if not os.path.exists(tokenized_path):
+        tokenized_path = tokenize_text(args)
+    else:
+        log("File already exists" % step, args.verbose)
     step += 1
+
 
     log("Step%s: Reading keywords" % step, args.verbose)
     documents_keywords = read_documents(tokenized_path)

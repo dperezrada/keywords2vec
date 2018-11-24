@@ -27,6 +27,11 @@ def main():
         required=False, help="negative keywords",
         metavar="NEGATIVE", default=""
     )
+    parser.add_argument(
+        "-t", dest="top_similars",
+        required=False, help="Number of similar keywords",
+        metavar="NEGATIVE", default="50", type=int
+    )
     args = parser.parse_args()
     args.experiment_path = os.path.join(args.directory, args.name)
 
@@ -37,7 +42,7 @@ def main():
     _, counter_frame = load_counter(counter_store_path)
     try_model(
         keywords_vectors, counter_frame,
-        args.positive.split(","), args.negative.split(","), total_results=25
+        args.positive.split(","), args.negative.split(","), total_results=args.top_similars
     )
 
 
@@ -70,10 +75,13 @@ def try_model(
         ),
         columns=["term", "score"]
     )
-    keywords_similar = top_similars.merge(
-        counter_frame, on='term', how='left'
-    )
-    print(keywords_similar.to_string())
+    if counter_frame:
+        keywords_similar = top_similars.merge(
+            counter_frame, on='term', how='left'
+        )
+        print(keywords_similar.to_string())
+    else:
+        print(top_similars.to_string())
 
 if __name__ == '__main__':
     main()
