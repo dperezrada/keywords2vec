@@ -30,7 +30,7 @@ def main():
     parser.add_argument(
         "-t", dest="top_similars",
         required=False, help="Number of similar keywords",
-        metavar="NEGATIVE", default="50", type=int
+        metavar="TOP_SIMILARS", default="50", type=int
     )
     args = parser.parse_args()
     args.experiment_path = os.path.join(args.directory, args.name)
