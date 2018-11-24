@@ -99,7 +99,7 @@ def main():
     if not os.path.exists(tokenized_path):
         tokenized_path = tokenize_text(args)
     else:
-        log("File already exists" % step, args.verbose)
+        log("File already exists", args.verbose)
     step += 1
 
 
