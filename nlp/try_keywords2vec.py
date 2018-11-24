@@ -30,7 +30,7 @@ def main():
     parser.add_argument(
         "-t", dest="top_similars",
         required=False, help="Number of similar keywords",
-        metavar="TOP_SIMILARS", default="50", type=int
+        metavar="TOP_SIMILARS", default="25", type=int
     )
     args = parser.parse_args()
     args.experiment_path = os.path.join(args.directory, args.name)
@@ -39,10 +39,11 @@ def main():
     keywords_vectors = load_vectors(store_model_path)
 
     counter_store_path = os.path.join(args.experiment_path, "keywords_counter.tsv")
-    _, counter_frame = load_counter(counter_store_path)
+    counter = load_counter(counter_store_path)
+    positive_keywords = [key for key in args.positive.split(",") if key]
+    negative_keywords = [key for key in args.negative.split(",") if key]
     try_model(
-        keywords_vectors, counter_frame,
-        args.positive.split(","), args.negative.split(","), total_results=args.top_similars
+        keywords_vectors, counter, positive_keywords, negative_keywords, total_results=args.top_similars
     )
 
 
@@ -57,31 +58,29 @@ def load_counter(counter_path):
     counter_dict = {}
     for line in open(counter_path):
         keyword, total = line[0:-1].split("\t")
-        counter_dict[keyword] = total
+        if keyword:
+            counter_dict[keyword] = int(total)
     counter = Counter(counter_dict)
     del counter_dict
-    counter_frame = pd.DataFrame.from_dict(counter, orient='index').reset_index()
-    counter_frame = counter_frame.rename(columns={'index':'term', 0:'count'})
-    return counter, counter_frame
+    return counter
 
 def try_model(
-        keywords_vectors, counter_frame,
+        keywords_vectors, counter,
         positive_keywords, negative_keywords, total_results=25
     ):
-    top_similars = pd.DataFrame(
-        keywords_vectors.most_similar(
+    most_similars = [
+        (keyword, score, counter.get(keyword, 0))
+        for keyword, score in keywords_vectors.most_similar(
             positive=positive_keywords,
-            negative=negative_keywords, topn=total_results
-        ),
-        columns=["term", "score"]
-    )
-    if counter_frame:
-        keywords_similar = top_similars.merge(
-            counter_frame, on='term', how='left'
+            negative=negative_keywords, topn=int(total_results)
         )
-        print(keywords_similar.to_string())
-    else:
-        print(top_similars.to_string())
+    ]
+    print(
+        pd.DataFrame(
+            most_similars,
+            columns=["term", "score", "counter"]
+        ).to_string()
+    )
 
 if __name__ == '__main__':
     main()
