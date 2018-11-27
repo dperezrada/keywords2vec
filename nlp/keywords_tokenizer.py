@@ -36,7 +36,7 @@ def tokenize_one(text, stopwords=None, additional_stopwords=None, lang="en"):
         # generate multiple ! need for next regex
         (r'!', "!!"),
         # remove one character keyword
-        (r'(^|!)[^!](!|$)', "!!"),
+        (r'(^|!)[^!\n](!|$)', "!!"),
         # remove multiple ! (!!!!)
         (r'!+', "!"),
         # remove first and last !
