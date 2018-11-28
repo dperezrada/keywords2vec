@@ -5,6 +5,7 @@ from collections import Counter
 
 import gensim
 from flask import Flask, request, Response, send_from_directory
+
 app = Flask(__name__, static_url_path='')
 
 VECTORS_PATH=os.environ["VECTORS_PATH"]

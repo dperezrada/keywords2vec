@@ -97,3 +97,11 @@ python try_keywords2vec.py -n episte_30000 -p"obesity"
 | 23    | body fat distribution       | 0.387237       | 3     |
 | 24    | older age                   | 0.386911       | 26    |
 
+
+## Server
+
+You can start a server to play around with the data.
+
+```
+FLASK_APP=server/server.py VECTORS_PATH=server/models/episte_all_w10_s150 flask run
+```
