@@ -231,8 +231,8 @@ def save_vectors(keywords_vectors, args):
 
 
 def save_counter(counter, args):
-    counter_store_path = os.path.join(args.experiment_path, "keywords_counter.tsv")
-    with open(counter_store_path, 'wt') as _file:
+    counter_store_path = os.path.join(args.experiment_path, "keywords_counter.tsv.gz")
+    with gzip.open(counter_store_path, 'wt') as _file:
         for term, total in counter.most_common():
             _file.write("%s\t%s\n" % (term, total))
     return counter_store_path
