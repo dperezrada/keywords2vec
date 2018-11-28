@@ -42,6 +42,12 @@ mkdir -p data/inputs
 wget "http://s3.amazonaws.com/episte-labs/episte_title_abstract.tsv.gz" -O data/inputs/episte_title_abstract.tsv.gz
 ```
 
+### Install dependencies
+
+```
+pip install -r requirements.txt
+```
+
 ### Train the model
 
 Lets first use only 30,000 references to train, and

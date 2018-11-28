@@ -4,7 +4,6 @@ from argparse import ArgumentParser
 from collections import Counter
 
 import gensim
-import pandas as pd
 
 from keywords_tokenizer import tokenize_one
 
@@ -108,7 +107,7 @@ def main():
     step += 1
 
     log("Step%s: Calculate frequency" % step, args.verbose)
-    counter, _ = calculate_keywords_frequency(documents_keywords)
+    counter = calculate_keywords_frequency(documents_keywords)
     step += 1
 
     log("Step%s: Generate word2vec model" % step, args.verbose)
@@ -202,14 +201,11 @@ def read_documents(tokenized_path):
 # ## Calculate words frequency
 
 def calculate_keywords_frequency(documents_keywords):
-    counter = Counter([
+    return Counter([
         keyword
         for keywords in documents_keywords
         for keyword in keywords
     ])
-    counter_frame = pd.DataFrame.from_dict(counter, orient='index').reset_index()
-    counter_frame = counter_frame.rename(columns={'index':'term', 0:'count'})
-    return counter, counter_frame
 
 def generate_word2vec_model(documents_keywords, args):
     total_documents = len(documents_keywords)
