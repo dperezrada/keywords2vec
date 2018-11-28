@@ -1,22 +1,13 @@
 import gzip
 import json
 import os
-from argparse import ArgumentParser
 from collections import Counter
 
 import gensim
 from flask import Flask, request, Response, send_from_directory
 app = Flask(__name__, static_url_path='')
 
-parser = ArgumentParser()
-parser.add_argument(
-    "-d", "--directory", dest="experiment_path",
-    required=False, help="the directory where the word2vec and keywords_counter is located",
-    metavar="DIRECTORY", default="data/experiments/experiment_1"
-)
-
-args = parser.parse_args()
-
+VECTORS_PATH=os.environ["VECTORS_PATH"]
 
 def load_vectors(vectors_path):
     return gensim.models.KeyedVectors.load(
@@ -33,8 +24,8 @@ def load_counter(counter_path):
     del counter_dict
     return counter
 
-VECTORS = load_vectors(os.path.join(args.experiment_path, "word2vec.vec"))
-COUNTER = load_counter(os.path.join(args.experiment_path, "keywords_counter.tsv.gz"))
+VECTORS = load_vectors(os.path.join(VECTORS_PATH, "word2vec.vec"))
+COUNTER = load_counter(os.path.join(VECTORS_PATH, "keywords_counter.tsv.gz"))
 
 def get_keywords_list(target_parameter):
     return [
