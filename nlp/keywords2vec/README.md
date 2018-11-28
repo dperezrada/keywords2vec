@@ -1,5 +1,38 @@
 # Keywords2vec
-The main idea of the project, is to generate a word2vec
+
+## Main idea
+To generate a word2vec model, but using keywords instead of one word.
+
+### Motivation
+From the Epistemonikos database (epistemonikos.org), a database of scientific articles in health.
+
+The language used in medicine is super complex. You can easily find keywords like:
+ * asthma
+ * heart failure
+ * medial compartment knee osteoarthritis
+ * preserved left ventricular systolic function
+ * non-selective non-steroidal anti-inflammatory drugs
+
+We tried some approaches before like ngrams, ngrams + tf-idf, identify entities, within others. But we didn't got really good results.
+
+### Our approach
+
+We found that tokenizing using stopwords + non word characters, was really usefull for "finding" the keywords. An example:
+
+* input: "Timing of replacement therapy for acute renal failure after cardiac surgery"
+* output: [
+	"timing",
+	"replacement therapy",
+	"acute renal failure",
+	"cardiac surgery"
+]
+
+So we will split the text when we find:
+ * a stopword
+ * a non word character (except from - and ')
+
+That's it.
+
 
 ## Epistemonikos Example
 
