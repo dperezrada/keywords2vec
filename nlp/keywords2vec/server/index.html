@@ -13,6 +13,9 @@
       font-weight: bold;
       font-size: 1.2em;
     }
+    input[type="text"] {
+      text-transform: lowercase;
+    }
   </style>
 </head>
 <body>
@@ -42,9 +45,10 @@
     </div>
   </div>
   <script>
+    var keywords = []
     var retrieveResults = function(){
-      var positive = jQuery(".positive").val()
-      var negative = jQuery(".negative").val()
+      var positive = jQuery(".positive").val().toLowerCase()
+      var negative = jQuery(".negative").val().toLowerCase()
       var size = jQuery(".size").val()
       jQuery.ajax("/keywords?positive="+positive+"&negative="+negative+"&size="+size).done(function(data) {
         var htmlText = ""

@@ -18,6 +18,11 @@ def tokenize_one(text, stopwords=None, additional_stopwords=None, lang="en"):
         stopwords = STOPWORDS[lang] + NUMBERS_STOPWORDS[lang]
     if additional_stopwords:
         stopwords += additional_stopwords
+    stopwords = [
+        stopword
+        for stopword in stopwords
+        if stopword
+    ]
     text_part = text.lower()
 
     # Must be executed in order

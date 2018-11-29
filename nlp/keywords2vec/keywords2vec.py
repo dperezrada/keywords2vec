@@ -154,13 +154,20 @@ def tokenize_text(args):
                 break
     return tokenized_path
 
+def open_file(filepath, options):
+    if filepath[-3:] == ".gz":
+        return gzip.open(filepath, options)
+    return open(filepath, options)
+
 def get_file_chunks(filepath, lines_chunk, args):
-    with gzip.open(filepath, "rt") as _file:
-        while True:
-            next_n_lines = list(chunk_of_text(_file, lines_chunk, args))
-            yield "\n".join(next_n_lines)
-            if not next_n_lines:
-                break
+    _file = open_file(filepath, 'rt')
+    while True:
+        next_n_lines = list(chunk_of_text(_file, lines_chunk, args))
+        yield "\n".join(next_n_lines)
+        if not next_n_lines:
+            break
+    _file.close()
+
 
 def chunk_of_text(_file, chunk_size, args):
     index = 0
@@ -193,7 +200,7 @@ def log(line, verbose=True, inline=False):
 def read_documents(tokenized_path):
     documents_keywords = []
     index = 0
-    for line in gzip.open(tokenized_path, "rt"):
+    for line in open_file(tokenized_path, "rt"):
         documents_keywords.append(line[0:-1].split("!"))
         index += 1
     return documents_keywords
