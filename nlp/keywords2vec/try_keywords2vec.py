@@ -1,4 +1,5 @@
 import os
+import gzip
 from argparse import ArgumentParser
 from collections import Counter
 import pandas as pd
@@ -38,7 +39,7 @@ def main():
     store_model_path = os.path.join(args.experiment_path, "word2vec.vec")
     keywords_vectors = load_vectors(store_model_path)
 
-    counter_store_path = os.path.join(args.experiment_path, "keywords_counter.tsv")
+    counter_store_path = os.path.join(args.experiment_path, "keywords_counter.tsv.gz")
     counter = load_counter(counter_store_path)
     positive_keywords = [key for key in args.positive.split(",") if key]
     negative_keywords = [key for key in args.negative.split(",") if key]
@@ -56,7 +57,7 @@ def load_vectors(store_model_path):
 
 def load_counter(counter_path):
     counter_dict = {}
-    for line in open(counter_path):
+    for line in gzip.open(counter_path, "rt"):
         keyword, total = line[0:-1].split("\t")
         if keyword:
             counter_dict[keyword] = int(total)

@@ -51,8 +51,9 @@ pip install -r requirements.txt
 
 Lets first use only 30,000 references to train, and
 ```
-python keywords2vec.py -i data/inputs/episte_title_abstract.tsv.gz -c 2,3 -a "from,will,vs,versus,from,patient,patients,ci,md" -n episte_30000 -s 30000
+python keywords2vec.py -i data/inputs/episte_title_abstract.tsv.gz --column-numbers=2,3 --additional-stopwords="from,will,vs,versus,from,patient,patients,ci,md" --name="episte_30000" --sample=30000
 ```
+
 
 > Step1: Tokenizing
 

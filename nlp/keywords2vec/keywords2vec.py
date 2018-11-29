@@ -94,11 +94,11 @@ def main():
 
     step = 1
     log("Step%s: Tokenizing" % step, args.verbose)
-    tokenized_path = os.path.join(args.experiment_path, "tokenized.txt.gz")
-    if not os.path.exists(tokenized_path):
-        tokenized_path = tokenize_text(args)
-    else:
-        log("File already exists", args.verbose)
+    # tokenized_path = os.path.join(args.experiment_path, "tokenized.txt.gz")
+    # if not os.path.exists(tokenized_path):
+    tokenized_path = tokenize_text(args)
+    # else:
+    #     log("File already exists", args.verbose)
     step += 1
 
 
