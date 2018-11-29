@@ -4,16 +4,15 @@
 To generate a word2vec model, but using keywords instead of one word.
 
 ### Motivation
-From the Epistemonikos database (epistemonikos.org), a database of scientific articles in health.
+The idea started in the Epistemonikos database (epistemonikos.org), a database of scientific articles in health. Because normally in health/medicine the language used is complex. You can easily find keywords like:
 
-The language used in medicine is super complex. You can easily find keywords like:
  * asthma
  * heart failure
  * medial compartment knee osteoarthritis
  * preserved left ventricular systolic function
  * non-selective non-steroidal anti-inflammatory drugs
 
-We tried some approaches before like ngrams, ngrams + tf-idf, identify entities, within others. But we didn't got really good results.
+We tried some approaches to find those keywords, like ngrams, ngrams + tf-idf, identify entities, within others. But we didn't got really good results.
 
 ### Our approach
 
@@ -27,7 +26,7 @@ We found that tokenizing using stopwords + non word characters, was really usefu
 	"cardiac surgery"
 ]
 
-So we will split the text when we find:
+So we basically split the text when we find:
  * a stopword
  * a non word character (except from - and ')
 
@@ -55,12 +54,17 @@ Lets first use only 30,000 references to train, and
 python keywords2vec.py -i data/inputs/episte_title_abstract.tsv.gz -c 2,3 -a "from,will,vs,versus,from,patient,patients,ci,md" -n episte_30000 -s 30000
 ```
 
-Step1: Tokenizing
-Step2: Reading keywords
-Step3: Calculate frequency
-Step4: Generate word2vec model
-Step5: Save vectors
-Step6: Save counter
+> Step1: Tokenizing
+
+> Step2: Reading keywords
+
+> Step3: Calculate frequency
+
+> Step4: Generate word2vec model
+
+> Step5: Save vectors
+
+> Step6: Save counter
 
 ### Try it
 
