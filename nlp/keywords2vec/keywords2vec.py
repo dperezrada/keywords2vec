@@ -133,7 +133,10 @@ def tokenize_text(args):
         - input: "Acute renal failure (ARF) following cardiac surgery remains a significant cause of mortality. The aim of this study is to compare early and intensive use of continuous veno-venous hemodiafiltration (CVVHDF) with conservative usage of CVVHDF in patients with ARF after cardiac surgery."
         - output: "acute renal failure!arf!following cardiac surgery remains!significant cause!mortality!aim!study!compare early!intensive!continuous veno-venous hemodiafiltration!cvvhdf!conservative usage!cvvhdf!patients!arf!cardiac surgery"
     """
-    tokenized_path = os.path.join(args.experiment_path, "tokenized.txt.gz")
+    if not args.__contains__("tokenized_path"):
+        tokenized_path = os.path.join(args.experiment_path, "tokenized.txt.gz")
+    else:
+        tokenized_path = args.tokenized_path
 
 
     index = 0
@@ -163,7 +166,7 @@ def get_file_chunks(filepath, lines_chunk, args):
     _file = open_file(filepath, 'rt')
     while True:
         next_n_lines = list(chunk_of_text(_file, lines_chunk, args))
-        yield "\n".join(next_n_lines)
+        yield "\n".join(next_n_lines) + "\n"
         if not next_n_lines:
             break
     _file.close()
@@ -180,11 +183,14 @@ def chunk_of_text(_file, chunk_size, args):
             tmp_text_parts[int(col_numb)] + ". "
             for col_numb in args.column_numbers.split(",")
         ])
-        del tmp_text_parts
+        if args.__contains__("key_column") and args.key_column >= 0:
+            yield "%s\t%s" % (tmp_text_parts[args.key_column], selected_text_parts)
+        else:
+            for sentence in selected_text_parts.split("."):
+                if sentence.strip():
+                    yield sentence.strip()
 
-        for sentence in selected_text_parts.split("."):
-            if sentence.strip():
-                yield sentence.strip()
+        del tmp_text_parts
         if index >= chunk_size:
             break
         index += 1
