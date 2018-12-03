@@ -16,7 +16,12 @@ def main():
     parser.add_argument(
         "-n", "--name", dest="name",
         required=False, help="name of the experiment",
-        metavar="NAME", default="experiment_1"
+        metavar="NAME", default=""
+    )
+    parser.add_argument(
+        "-v", "--vector_path", dest="vector_path",
+        required=True, help="the path to the vector model. This is an alternative of using the directory + name",
+        metavar="VECTOR_MODEL_PATH"
     )
     parser.add_argument(
         "-p", "--positive", dest="positive",
@@ -36,15 +41,20 @@ def main():
     args = parser.parse_args()
     args.experiment_path = os.path.join(args.directory, args.name)
 
-    store_model_path = os.path.join(args.experiment_path, "word2vec.vec")
-    keywords_vectors = load_vectors(store_model_path)
+    if args.vector_path:
+        keywords_vectors = load_vectors(args.vector_path)
+    else:
+        store_model_path = os.path.join(args.experiment_path, "word2vec.vec")
+        keywords_vectors = load_vectors(store_model_path)
 
-    counter_store_path = os.path.join(args.experiment_path, "keywords_counter.tsv.gz")
-    counter = load_counter(counter_store_path)
+    counter = None
+    if args.experiment_path and args.name:
+        counter_store_path = os.path.join(args.experiment_path, "keywords_counter.tsv.gz")
+        counter = load_counter(counter_store_path)
     positive_keywords = [key for key in args.positive.split(",") if key]
     negative_keywords = [key for key in args.negative.split(",") if key]
     try_model(
-        keywords_vectors, counter, positive_keywords, negative_keywords, total_results=args.top_similars
+        keywords_vectors, positive_keywords, negative_keywords, total_results=args.top_similars, counter=counter
     )
 
 
@@ -66,11 +76,13 @@ def load_counter(counter_path):
     return counter
 
 def try_model(
-        keywords_vectors, counter,
-        positive_keywords, negative_keywords, total_results=25
+        keywords_vectors,
+        positive_keywords, negative_keywords, total_results=25, counter=None
     ):
+    if not counter:
+        counter = {}
     most_similars = [
-        (keyword, score, counter.get(keyword, 0))
+        (keyword, score, counter.get(keyword, '?'))
         for keyword, score in keywords_vectors.most_similar(
             positive=positive_keywords,
             negative=negative_keywords, topn=int(total_results)
@@ -82,6 +94,7 @@ def try_model(
             columns=["term", "score", "counter"]
         ).to_string()
     )
+
 
 if __name__ == '__main__':
     main()

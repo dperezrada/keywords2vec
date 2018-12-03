@@ -40,8 +40,9 @@
           <input class="input is-primary size" value="50" type="text" placeholder="Total results">
         </div>
       </div>
+      <div class="error-messages"></div>
       <div><a class="button keywords-btn">Get keywords</a></div>
-      <div style="margin-top: 20px" class="results"></div>
+      <div style="margin-top: 20px" class="results columns is-gapless is-multiline is-mobile"></div>
     </div>
   </div>
   <script>
@@ -50,18 +51,25 @@
       var positive = jQuery(".positive").val().toLowerCase()
       var negative = jQuery(".negative").val().toLowerCase()
       var size = jQuery(".size").val()
-      jQuery.ajax("/keywords?positive="+positive+"&negative="+negative+"&size="+size).done(function(data) {
+      jQuery(".error-messages").html("")
+      jQuery.ajax("/keywords/similars?positive="+positive+"&negative="+negative+"&size="+size).done(function(data) {
         var htmlText = ""
         jQuery.each(data, function(index, row){
-          htmlText += '<div class="card"><div class="card-content"><p class="title">'
+          htmlText += '<div class="card column is-half"><div class="card-content"><p class="title">'
           htmlText += row[0]
           htmlText += "</p></div></div>"
         });
         jQuery(".results").html(htmlText);
+      }).fail(function(){
+        jQuery(".error-messages").html("Couldn't find the keyword")
       })
     }
     jQuery(document).ready(function(){
       jQuery(".keywords-btn").click(retrieveResults);
+      jQuery.ajax("/keywords/all").done(function(data) {
+        keywords = data;
+        window.keywords = keywords;
+      })
       jQuery(".positive").keypress(function (e) {
         if (e.which == 13) {
           retrieveResults()
