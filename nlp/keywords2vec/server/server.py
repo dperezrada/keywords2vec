@@ -67,6 +67,10 @@ def get_keywords_list(target_parameter):
 def home():
     return send_from_directory('.', "index.html")
 
+@app.route('/public/<path:path>')
+def public_files(path):
+    return send_from_directory('public', path)
+
 @app.route("/keywords/similars")
 def get_similar_keywords():
     positive_keywords = get_keywords_list("positive")
@@ -111,9 +115,8 @@ def match_docs():
 
 @app.route("/keywords/all")
 def get_keywords_all():
-    keywords = []
-    for keyword, total in COUNTER.most_common():
-        if total < MIN_TOTAL:
-            break
-        keywords.append(keyword)
-    return Response(json.dumps(keywords), mimetype='application/json')
+    # for keyword, total in COUNTER.most_common():
+    #     if total < MIN_TOTAL:
+    #         break
+    #     keywords.append(keyword)
+    return Response(json.dumps(list(VECTORS.vocab.keys())), mimetype='application/json')
