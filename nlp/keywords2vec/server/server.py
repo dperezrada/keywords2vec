@@ -120,3 +120,6 @@ def get_keywords_all():
     #         break
     #     keywords.append(keyword)
     return Response(json.dumps(list(VECTORS.vocab.keys())), mimetype='application/json')
+
+if __name__ == '__main__':
+    app.run()
