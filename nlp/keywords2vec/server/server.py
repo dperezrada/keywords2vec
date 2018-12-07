@@ -91,13 +91,13 @@ def get_similar_keywords():
     ]
     return Response(json.dumps(most_similars), mimetype='application/json')
 
-@app.route("/keywords/match_docs")
+@app.route("/keywords/match_docs", methods=['POST'])
 def match_docs():
-    groups = (request.args.get("keywords") or "").lower().split("::")
+    groups = request.get_json()
     groups_docs = []
-    for group_text in groups:
+    for keywords_groups in groups:
         docs = []
-        for keyword in group_text.split(","):
+        for keyword in keywords_groups:
             docs += KEYWORDS_DOCS.get(keyword) or []
         groups_docs.append(set(docs))
     if len(groups_docs) > 1:
