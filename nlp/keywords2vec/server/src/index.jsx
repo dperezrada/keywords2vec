@@ -183,7 +183,7 @@ class VectorsApp extends React.Component{
     }
   }
   componentDidMount(){
-    axios.get("/keywords/all")
+    axios.get("./keywords/all")
       .then((res) => {
         this.setState({
           keywords: res.data.sort(),
@@ -195,7 +195,7 @@ class VectorsApp extends React.Component{
   }
   search(positive, negative, size){
     // Update data
-    var targetUrl = "/keywords/similars?"
+    var targetUrl = "./keywords/similars?"
     targetUrl += "positive=" + positive
     targetUrl += "&negative=" + negative
     targetUrl += "&size=" + size
