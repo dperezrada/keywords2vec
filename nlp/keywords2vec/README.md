@@ -70,7 +70,7 @@ python keywords2vec.py -i data/inputs/episte_title_abstract.tsv.gz --column-numb
 ### Try it
 
 ```
-python try_keywords2vec.py -n episte_30000 -p"obesity"
+python try_keywords2vec.py -v data/experiments/episte_3000/word2vec.vec -n episte_30000 -p"obesity"
 ```
 
 
