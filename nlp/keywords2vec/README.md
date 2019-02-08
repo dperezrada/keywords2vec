@@ -3,6 +3,28 @@
 ## Main idea
 To generate a word2vec model, but using keywords instead of one word.
 
+## Example
+Finding similar keywords for "obesity"
+
+| index | term                        | score          | count |
+|-------|-----------------------------|----------------|-------|
+| 0     | overweight                  | 0.500965       | 297   |
+| 1     | obese individuals           | 0.479940       | 15    |
+| 2     | obese                       | 0.470804       | 152   |
+| 3     | hypertension                | 0.444629       | 838   |
+| 4     | obese adults                | 0.444151       | 28    |
+| 5     | bariatric surgery           | 0.441297       | 83    |
+| 6     | metabolic syndrome          | 0.437270       | 85    |
+| 7     | increased prevalence        | 0.437177       | 19    |
+| 8     | lifestyle interventions     | 0.434440       | 58    |
+| 9     | insulin resistance          | 0.431953       | 85    |
+| 10    | obese subjects              | 0.429812       | 13    |
+| 11    | obese people                | 0.426166       | 13    |
+| 12    | whole grains                | 0.423689       | 6     |
+| 13    | underweight                 | 0.420408       | 14    |
+| 14    | local food environments     | 0.416360       | 4     |
+| 15    | dyslipidemia                | 0.415990       | 28    |
+
 ### Motivation
 The idea started in the Epistemonikos database (epistemonikos.org), a database of scientific articles in health. Because normally in health/medicine the language used is complex. You can easily find keywords like:
 
@@ -28,7 +50,7 @@ We found that tokenizing using stopwords + non word characters, was really usefu
 
 So we basically split the text when we find:
  * a stopword
- * a non word character (except from - and ')
+ * a non word character(/,!?. etc) (except from - and ')
 
 That's it.
 
@@ -49,7 +71,7 @@ pip install -r requirements.txt
 
 ### Train the model
 
-Lets first use only 30,000 references to train, and
+Lets first use only 30,000 references to train the embeddings
 ```
 python keywords2vec.py -i data/inputs/episte_title_abstract.tsv.gz --column-numbers=2,3 --additional-stopwords="from,will,vs,versus,from,patient,patients,ci,md" --name="episte_30000" --sample=30000
 ```
@@ -72,7 +94,7 @@ python keywords2vec.py -i data/inputs/episte_title_abstract.tsv.gz --column-numb
 ```
 python try_keywords2vec.py -v data/experiments/episte_3000/word2vec.vec -n episte_30000 -p"obesity"
 ```
-
+Finding similar keywords for "obesity"
 
 | index | term                        | score          | count |
 |-------|-----------------------------|----------------|-------|
