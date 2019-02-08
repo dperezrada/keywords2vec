@@ -4,7 +4,7 @@
 To generate a word2vec model, but using keywords instead of one word.
 
 ## Example
-Finding similar keywords for "obesity"
+Finding similar keywords for "__obesity__"
 
 | index | term                        | score          | count |
 |-------|-----------------------------|----------------|-------|
