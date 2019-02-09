@@ -1,9 +1,11 @@
 # Keywords2vec
 
 ## Main idea
-To generate a word2vec model, but using keywords instead of one word.
+
+To generate a word2vec model, but using multi-word keywords instead of single words.
 
 ## Example
+
 Finding similar keywords for "__obesity__"
 
 | index | term                        | score          | count |
@@ -26,6 +28,7 @@ Finding similar keywords for "__obesity__"
 | 15    | dyslipidemia                | 0.415990       | 28    |
 
 ### Motivation
+
 The idea started in the Epistemonikos database (epistemonikos.org), a database of scientific articles in health. Because normally in health/medicine the language used is complex. You can easily find keywords like:
 
  * asthma
@@ -34,11 +37,11 @@ The idea started in the Epistemonikos database (epistemonikos.org), a database o
  * preserved left ventricular systolic function
  * non-selective non-steroidal anti-inflammatory drugs
 
-We tried some approaches to find those keywords, like ngrams, ngrams + tf-idf, identify entities, within others. But we didn't got really good results.
+We tried some approaches to find those keywords, like ngrams, ngrams + tf-idf, identify entities, among others. But we didn't get really good results.
 
 ### Our approach
 
-We found that tokenizing using stopwords + non word characters, was really usefull for "finding" the keywords. An example:
+We found that tokenizing using stopwords + non word characters was really useful for "finding" the keywords. An example:
 
 * input: "Timing of replacement therapy for acute renal failure after cardiac surgery"
 * output: [
@@ -58,6 +61,7 @@ That's it.
 ## Epistemonikos Example
 
 ### Get the data
+
 ```
 mkdir -p data/inputs
 wget "http://s3.amazonaws.com/episte-labs/episte_title_abstract.tsv.gz" -O data/inputs/episte_title_abstract.tsv.gz
@@ -71,11 +75,10 @@ pip install -r requirements.txt
 
 ### Train the model
 
-Lets first use only 30,000 references to train the embeddings
+Let's first use only 30,000 references to train the embeddings:
 ```
 python keywords2vec.py -i data/inputs/episte_title_abstract.tsv.gz --column-numbers=2,3 --additional-stopwords="from,will,vs,versus,from,patient,patients,ci,md" --name="episte_30000" --sample=30000
 ```
-
 
 > Step1: Tokenizing
 
@@ -94,6 +97,7 @@ python keywords2vec.py -i data/inputs/episte_title_abstract.tsv.gz --column-numb
 ```
 python try_keywords2vec.py -v data/experiments/episte_3000/word2vec.vec -n episte_30000 -p"obesity"
 ```
+
 Finding similar keywords for "obesity"
 
 | index | term                        | score          | count |
@@ -124,11 +128,9 @@ Finding similar keywords for "obesity"
 | 23    | body fat distribution       | 0.387237       | 3     |
 | 24    | older age                   | 0.386911       | 26    |
 
-
 ## Server
 
-You can start a server to play around with the data.
-
+You can start a server to play around with the data:
 ```
 FLASK_APP=server/server.py VECTORS_PATH=server/models/episte_all_w10_s150 flask run
 ```
