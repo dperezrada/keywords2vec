@@ -58,6 +58,33 @@ So we basically split the text when we find:
 That's it.
 
 
+### References
+
+Seem to be an old idea (2004):
+Mihalcea, Rada, and Paul Tarau. "Textrank: Bringing order into text." Proceedings of the 2004 conference on empirical methods in natural language processing. 2004.
+
+Reading an implementation of textrank, I realize they used stopwords to separate and create the graph. Then I though in using it as tokenizer for word2vec
+
+As pointed by @deliprao in this [twitter thread](https://twitter.com/jeremyphoward/status/1094025901371621376)
+
+It's also used by Rake (2010):
+Rose, Stuart & Engel, Dave & Cramer, Nick & Cowley, Wendy. (2010). Automatic Keyword Extraction from Individual Documents. 10.1002/9780470689646.ch1.
+
+As noted by @astent in the Twitter thread, this concept is called chinking (chunking by exclusion)
+[https://www.nltk.org/book/ch07.html#Chinking](https://www.nltk.org/book/ch07.html#Chinking)
+
+### Multi-lingual
+We worked in an implementation, that could be used in multiple languages. Of course not all languages are sutable for using this approach. We have tried with good results in English, Spanish and Portuguese (you need the stopwords for each language)
+
+For more detail, take a look to the tokenizer here: [keywords_tokenizer.py](keywords_tokenizer.py)
+
+## Try it online
+
+You can try it [here](http://18.212.76.171/episte/) (takes time to load, lowercase only, doesn't work in mobile yet) MPV :)
+
+These embedding were created using 827,341 title/abstract from @epistemonikos database.
+With keywords that repeat at least 10 times. The total vocab is 349,080 keywords (really manageable number)
+
 ## Epistemonikos Example
 
 ### Get the data
