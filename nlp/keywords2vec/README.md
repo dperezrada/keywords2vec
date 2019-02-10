@@ -91,6 +91,8 @@ It's a fact that this method is not perfect. You are going to lose, keywords tha
  * Vitamin A
  * Web of Science
 
+As pointed out by [@peteskomoroch](https://twitter.com/peteskomoroch/status/1094036075247325184) there is other library [AutoPhrase](https://github.com/shangjingbo1226/AutoPhrase) that seem to deal with this (haven't try it yet)
+
 ## Vocab size
 
 One of the main benefit of this method, is the size of the vocabulary. 
@@ -106,7 +108,7 @@ For example, using keywords that repeat at least 10 times, for the Epistemonikos
 |                    |           |         |
 | stopword tokenizer | 350,529   | 100%    |
 
-More information regarding the comparison, take a look to the folder [analyse](analyse).
+More information regarding the comparison, take a look to the folder [analyze](analyze).
 
 ## Epistemonikos Example
 
