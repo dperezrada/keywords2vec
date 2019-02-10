@@ -85,6 +85,29 @@ You can try it [here](http://18.212.76.171/episte/) (takes time to load, lowerca
 These embedding were created using 827,341 title/abstract from @epistemonikos database.
 With keywords that repeat at least 10 times. The total vocab is 349,080 keywords (really manageable number)
 
+## Limitations
+
+It's a fact that this method is not perfect. You are going to lose, keywords that cointain stopwords, like:
+ * Vitamin A
+ * Web of Science
+
+## Vocab size
+
+One of the main benefit of this method, is the size of the vocabulary. 
+For example, using keywords that repeat at least 10 times, for the Epistemonikos dataset (827,341 title/abstract), we got the following vocab size:
+
+| ngrams             | keywords  | comp    |
+|--------------------|-----------|---------|
+| 1                  | 127,824   | 36%     |
+| 1,2                | 1,360,550 | 388%    |
+| 1-3                | 3,204,099 | 914%    |
+| 1-4                | 4,461,930 | 1,272%  |
+| 1-5                | 5,133,619 | 1,464%  |
+|                    |           |         |
+| stopword tokenizer | 350,529   | 100%    |
+
+More information regarding the comparison, take a look to the folder [analyse](analyse).
+
 ## Epistemonikos Example
 
 ### Get the data
