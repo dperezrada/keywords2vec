@@ -6,7 +6,9 @@ from collections import Counter
 import gensim
 
 from keywords_tokenizer import tokenize_one, scispacy_tokenizer, tokenize_by_nltk
-
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from fastprogress.fastprogress import progress_bar
+from typing import Collection
 
 def main():
     parser = ArgumentParser()
@@ -83,14 +85,14 @@ def main():
         "--workers", dest="workers",
         required=False,
         help="Total numbers of CPU workers",
-        metavar="CPU_WORKERS", default="4", type=int
+        metavar="CPU_WORKERS", default="-1", type=int
     )
-    parser.add_argument(
-        "--tokenizers", dest="tokenizers",
-        required=False,
-        help="List of tokenizers to user options: (default,nltk,scispacy), more than one allowed separated by comma",
-        metavar="TOKENIZERS", default="default", type=str
-    )
+    # parser.add_argument(
+    #     "--tokenizers", dest="tokenizers",
+    #     required=False,
+    #     help="List of tokenizers to user options: (default,nltk,scispacy), more than one allowed separated by comma",
+    #     metavar="TOKENIZERS", default="default", type=str
+    # )
 
     args = parser.parse_args()
     args.experiment_path = os.path.join(args.output_directory, args.name)
@@ -98,6 +100,8 @@ def main():
         os.makedirs(args.experiment_path)
     if args.sample_size > 0 and args.sample_size < args.lines_chunks:
         args.lines_chunks = args.sample_size
+    if args.workers < 0:
+        args.workers = num_cpus()
 
     step = 1
     log("Step%s: Tokenizing" % step, args.verbose)
@@ -129,6 +133,33 @@ def main():
     save_counter(counter, args)
     step += 1
 
+# From fastai
+def parallel(func, arr:Collection, max_workers:int=None):
+    with ProcessPoolExecutor(max_workers=max_workers) as ex:
+        futures = [ex.submit(func, o, i) for i, o in enumerate(arr)]
+        results = []
+        for f in progress_bar(as_completed(futures), total=len(arr)):
+            results.append(f.result())
+        return results
+
+
+def num_cpus()->int:
+    "Get number of cpus"
+    try:
+        return len(os.sched_getaffinity(0))
+    except AttributeError:
+        return os.cpu_count()
+# end
+
+def tokenize_chunk(text_part, index):
+    output = ""
+    # for tokenizer_el in args.tokenizers:
+    for tokenizer_el in ("default", "nltk", "scispacy"):
+        output += tokenize_one(
+            text_part,
+            # additional_stopwords=args.additional_stopwords.split(",")
+        ) + "\n"
+    return output
 
 def tokenize_text(args):
     """This is the parts where we are goint to separate the text, according to the following rules.
@@ -154,33 +185,30 @@ def tokenize_text(args):
     index = 0
     with gzip.open(tokenized_path, "wt") as _output:
         # We are going to split the text in chunks to show some progress.
-        for text_part in get_file_chunks(args.input_filename, args.lines_chunks, args):
-            for tokenizer_el in args.tokenizers:
-                text_part = tokenize_one(
-                    text_part,
-                    additional_stopwords=args.additional_stopwords.split(",")
-                )
-                _output.write(text_part + "\n")
-            index += 1
-            log(
-                "%s lines processed" % (index * args.lines_chunks),
-                verbose=args.verbose, inline=True
-            )
-            if args.sample_size > 0 and index * args.lines_chunks >= args.sample_size:
-                break
+        text_chunks = list(get_file_chunks(args.input_filename, args.lines_chunks, args))
+
+        results = parallel(tokenize_chunk, text_chunks, args.workers)
+        _output.write("\n".join(results) + "\n")
+
     return tokenized_path
+
 
 def open_file(filepath, options):
     if filepath[-3:] == ".gz":
         return gzip.open(filepath, options)
     return open(filepath, options)
 
+
 def get_file_chunks(filepath, lines_chunk, args):
     _file = open_file(filepath, 'rt')
+    index = 0
     while True:
         next_n_lines = list(chunk_of_text(_file, lines_chunk, args))
         yield "\n".join(next_n_lines) + "\n"
         if not next_n_lines:
+            break
+        index += lines_chunk
+        if args.sample_size > 0 and index >= args.sample_size:
             break
     _file.close()
 
