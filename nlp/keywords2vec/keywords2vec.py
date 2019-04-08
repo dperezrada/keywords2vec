@@ -5,7 +5,7 @@ from collections import Counter
 
 import gensim
 
-from keywords_tokenizer import tokenize_one
+from keywords_tokenizer import tokenize_one, scispacy_tokenizer, tokenize_by_nltk
 
 
 def main():
@@ -85,6 +85,13 @@ def main():
         help="Total numbers of CPU workers",
         metavar="CPU_WORKERS", default="4", type=int
     )
+    parser.add_argument(
+        "--tokenizers", dest="tokenizers",
+        required=False,
+        help="List of tokenizers to user options: (default,nltk,scispacy), more than one allowed separated by comma",
+        metavar="TOKENIZERS", default="default", type=str
+    )
+
     args = parser.parse_args()
     args.experiment_path = os.path.join(args.output_directory, args.name)
     if not os.path.exists(args.experiment_path):
@@ -122,6 +129,7 @@ def main():
     save_counter(counter, args)
     step += 1
 
+
 def tokenize_text(args):
     """This is the parts where we are goint to separate the text, according to the following rules.
     We are goint to use the stopwords to separate the different expression,
@@ -133,21 +141,26 @@ def tokenize_text(args):
         - input: "Acute renal failure (ARF) following cardiac surgery remains a significant cause of mortality. The aim of this study is to compare early and intensive use of continuous veno-venous hemodiafiltration (CVVHDF) with conservative usage of CVVHDF in patients with ARF after cardiac surgery."
         - output: "acute renal failure!arf!following cardiac surgery remains!significant cause!mortality!aim!study!compare early!intensive!continuous veno-venous hemodiafiltration!cvvhdf!conservative usage!cvvhdf!patients!arf!cardiac surgery"
     """
+    tokenizers_options = {
+        "nltk": tokenize_one,
+        "scispacy": scispacy_tokenizer,
+        "ntlk": tokenize_by_nltk
+    }
     if not args.__contains__("tokenized_path"):
         tokenized_path = os.path.join(args.experiment_path, "tokenized.txt.gz")
     else:
         tokenized_path = args.tokenized_path
 
-
     index = 0
     with gzip.open(tokenized_path, "wt") as _output:
         # We are going to split the text in chunks to show some progress.
         for text_part in get_file_chunks(args.input_filename, args.lines_chunks, args):
-            text_part = tokenize_one(
-                text_part,
-                additional_stopwords=args.additional_stopwords.split(",")
-            )
-            _output.write(text_part)
+            for tokenizer_el in args.tokenizers:
+                text_part = tokenize_one(
+                    text_part,
+                    additional_stopwords=args.additional_stopwords.split(",")
+                )
+                _output.write(text_part + "\n")
             index += 1
             log(
                 "%s lines processed" % (index * args.lines_chunks),
