@@ -163,7 +163,7 @@ def tokenize_chunk(text_part, index):
     # for tokenizer_el in args.tokenizers:
     # for tokenizer_el in ("default", "nltk", "scispacy"):
     for tokenizer_el in ("default", "nltk"):
-        output += "\n" + tokenizer_el + "," + TOKENIZERS_OPTIONS[tokenizer_el](
+        output += "\n" + "," + TOKENIZERS_OPTIONS[tokenizer_el](
             text_part,
             # additional_stopwords=args.additional_stopwords.split(",")
         )
