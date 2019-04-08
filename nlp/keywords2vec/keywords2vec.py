@@ -10,6 +10,12 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from fastprogress.fastprogress import progress_bar
 from typing import Collection
 
+TOKENIZERS_OPTIONS = {
+    "default": tokenize_one,
+    "scispacy": scispacy_tokenizer,
+    "nltk": tokenize_by_nltk
+}
+
 def main():
     parser = ArgumentParser()
     parser.add_argument(
@@ -121,6 +127,10 @@ def main():
     counter = calculate_keywords_frequency(documents_keywords)
     step += 1
 
+    log("Step%s: Save counter" % step, args.verbose)
+    save_counter(counter, args)
+    step += 1
+
     log("Step%s: Generate word2vec model" % step, args.verbose)
     keywords_vectors = generate_word2vec_model(documents_keywords, args)
     step += 1
@@ -129,9 +139,6 @@ def main():
     save_vectors(keywords_vectors, args)
     step += 1
 
-    log("Step%s: Save counter" % step, args.verbose)
-    save_counter(counter, args)
-    step += 1
 
 # From fastai
 def parallel(func, arr:Collection, max_workers:int=None):
@@ -154,11 +161,12 @@ def num_cpus()->int:
 def tokenize_chunk(text_part, index):
     output = ""
     # for tokenizer_el in args.tokenizers:
-    for tokenizer_el in ("default", "nltk", "scispacy"):
-        output += tokenize_one(
+    # for tokenizer_el in ("default", "nltk", "scispacy"):
+    for tokenizer_el in ("default", "nltk"):
+        output += "\n" + tokenizer_el + "," + TOKENIZERS_OPTIONS[tokenizer_el](
             text_part,
             # additional_stopwords=args.additional_stopwords.split(",")
-        ) + "\n"
+        )
     return output
 
 def tokenize_text(args):
@@ -172,11 +180,7 @@ def tokenize_text(args):
         - input: "Acute renal failure (ARF) following cardiac surgery remains a significant cause of mortality. The aim of this study is to compare early and intensive use of continuous veno-venous hemodiafiltration (CVVHDF) with conservative usage of CVVHDF in patients with ARF after cardiac surgery."
         - output: "acute renal failure!arf!following cardiac surgery remains!significant cause!mortality!aim!study!compare early!intensive!continuous veno-venous hemodiafiltration!cvvhdf!conservative usage!cvvhdf!patients!arf!cardiac surgery"
     """
-    tokenizers_options = {
-        "nltk": tokenize_one,
-        "scispacy": scispacy_tokenizer,
-        "ntlk": tokenize_by_nltk
-    }
+
     if not args.__contains__("tokenized_path"):
         tokenized_path = os.path.join(args.experiment_path, "tokenized.txt.gz")
     else:

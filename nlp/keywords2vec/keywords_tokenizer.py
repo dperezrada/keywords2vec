@@ -83,16 +83,19 @@ def tokenize_by_nltk(text, stopwords=None, additional_stopwords=None, lang="en")
     grammar = r'KT: {(<JJ>* <NN.*>+ <IN>)? <JJ>* <NN.*>+}'
     chunker = RegexpParser(grammar)
 
-    sentences = nltk.sent_tokenize(text)
-    sentences = [nltk.word_tokenize(sent) for sent in sentences]
-    sentences = [nltk.pos_tag(sent) for sent in sentences]
-    keyphrases = []
-    relevant_words = set()
-    for s in sentences:
-        keyphrases.append(chunker.parse(s))
-    for elem in keyphrases:
-        relevant_words.update(get_nodes_for_ntlk(elem, stopwords))
-    return "!".join(relevant_words)
+    output = ""
+    for line in text.splitlines():
+        sentences = nltk.sent_tokenize(line)
+        sentences = [nltk.word_tokenize(sent) for sent in sentences]
+        sentences = [nltk.pos_tag(sent) for sent in sentences]
+        keyphrases = []
+        relevant_words = []
+        for s in sentences:
+            keyphrases.append(chunker.parse(s))
+        for elem in keyphrases:
+            relevant_words += get_nodes_for_ntlk(elem, stopwords)
+        output += "!".join(relevant_words) + "\n"
+    return output
 
 
 def clean_keywords(keywords):
@@ -103,5 +106,8 @@ def clean_keywords(keywords):
 
 
 def scispacy_tokenizer(text, stopwords=None, additional_stopwords=None, lang="en"):
-    doc = NLP(text)
-    return "!".join(clean_keywords(doc.ents))
+    output = ""
+    for line in text.splitlines():
+        doc = NLP(line)
+        output += "!".join(clean_keywords(doc.ents)) + "\n"
+    return output
