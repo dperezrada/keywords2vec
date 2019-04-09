@@ -123,6 +123,8 @@ wget "http://s3.amazonaws.com/episte-labs/episte_title_abstract.tsv.gz" -O data/
 
 ```
 pip install -r requirements.txt
+python3 -m nltk.downloader averaged_perceptron_tagger
+python3 -m nltk.downloader punkt
 ```
 
 ### Train the model
