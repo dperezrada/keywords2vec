@@ -14,14 +14,14 @@ def main():
         metavar="DIRECTORY", default="data/experiments"
     )
     parser.add_argument(
-        "-n", "--name", dest="name",
-        required=False, help="name of the experiment",
-        metavar="NAME", default=""
-    )
-    parser.add_argument(
         "-v", "--vector_path", dest="vector_path",
         required=True, help="the path to the vector model. This is an alternative of using the directory + name",
         metavar="VECTOR_MODEL_PATH"
+    )
+    parser.add_argument(
+        "-c", "--counter_path", dest="counter_path",
+        required=False, help="counter path",
+        metavar="COUNTER_PATH", default=""
     )
     parser.add_argument(
         "-p", "--positive", dest="positive",
@@ -39,24 +39,17 @@ def main():
         metavar="TOP_SIMILARS", default="25", type=int
     )
     args = parser.parse_args()
-    args.experiment_path = os.path.join(args.directory, args.name)
 
-    if args.vector_path:
-        keywords_vectors = load_vectors(args.vector_path)
-    else:
-        store_model_path = os.path.join(args.experiment_path, "word2vec.vec")
-        keywords_vectors = load_vectors(store_model_path)
+    keywords_vectors = load_vectors(args.vector_path)
 
     counter = None
-    if args.experiment_path and args.name:
-        counter_store_path = os.path.join(args.experiment_path, "keywords_counter.tsv.gz")
-        counter = load_counter(counter_store_path)
+    if args.counter_path:
+        counter = load_counter(args.counter_path)
     positive_keywords = [key for key in args.positive.split(",") if key]
     negative_keywords = [key for key in args.negative.split(",") if key]
     try_model(
         keywords_vectors, positive_keywords, negative_keywords, total_results=args.top_similars, counter=counter
     )
-
 
 ## Load the vectors
 def load_vectors(store_model_path):
@@ -68,9 +61,12 @@ def load_vectors(store_model_path):
 def load_counter(counter_path):
     counter_dict = {}
     for line in gzip.open(counter_path, "rt"):
-        keyword, total = line[0:-1].split("\t")
-        if keyword:
-            counter_dict[keyword] = int(total)
+        try:
+            keyword, total = line[0:-1].split("\t")
+            if keyword:
+                counter_dict[keyword] = int(total)
+        except:
+            pass
     counter = Counter(counter_dict)
     del counter_dict
     return counter
