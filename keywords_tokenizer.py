@@ -2,11 +2,8 @@ import re
 from nltk import RegexpParser
 import nltk
 import unidecode
-import scispacy
-import spacy
 
 
-NLP = spacy.load("en_core_sci_sm")
 STOPWORDS = {
     "en": [
         "several", "on", "while", "than", "own", "you've", "itself", "above", "such", "over", "they're", "mainly", "because", "theirs", "too", "most", "must", "myself", "that", "why's", "it", "can't", "show", "overall", "she", "he'd", "it's", "can", "under", "no", "she'll", "should", "therefore", "his", "you", "various", "mustn't", "are", "doing", "really", "up", "they'd", "having", "these", "made", "we'll", "into", "you'll", "more", "ought", "especially", "hasn't", "seem", "nor", "shows", "here's", "here", "he's", "is", "at", "ml", "always", "nearly", "during", "ours", "this", "aren't", "rather", "being", "very", "shown", "them", "cannot", "just", "or", "where", "didn't", "another", "they'll", "shouldn't", "wasn't", "for", "when's", "in", "could", "off", "down", "further", "won't", "due", "however", "each", "i'd", "a", "that's", "where's", "enough", "neither", "its", "isn't", "any", "himself", "was", "they've", "etc", "there's", "whom", "both", "other", "by", "within", "not", "been", "below", "be", "once", "make", "does", "did", "before", "through", "shan't", "ourselves", "which", "kg", "their", "again", "thus", "about", "few", "either", "they", "do", "our", "you'd", "some", "don't", "although", "almost", "i'll", "often", "i'm", "she'd", "we'd", "yourselves", "using", "between", "if", "upon", "him", "we", "done", "as", "so", "hers", "me", "she's", "there", "and", "i've", "may", "but", "with", "how", "found", "her", "yours", "might", "then", "we've", "the", "yourself", "what's", "km", "without", "same", "those", "my", "perhaps", "all", "haven't", "of", "why", "has", "had", "regarding", "significantly", "when", "i", "until", "used", "would", "among", "what", "let's", "am", "how's", "who's", "weren't", "mm", "hadn't", "have", "mg", "wouldn't", "showed", "were", "an", "we're", "obtained", "themselves", "who", "your", "out", "to", "doesn't", "he", "herself", "pmid", "against", "use", "you're", "couldn't", "after", "he'll", "only", "also", "mostly", "quite", "seen", "since"
@@ -43,7 +40,7 @@ def tokenize_one(text, stopwords=None, additional_stopwords=None, lang="en"):
         ("\\b" + "\\b|\\b".join(stopwords), "!!"),
         ("’", "'"),
         # Remove all non alpha, numeric, spaces, - or single quote
-        (r'([^a-z0-9\u00C0-\u1FFF\u2C00-\uD7FF \t\n\-\'])', "!!"),
+        (r'([^a-z0-9\u00C0-\u1FFF\u2C00-\uD7FF \n\-\'])', "!!"),
         # remove only words numbers
         (r'(^|[ !])[0-9]+([ !]|$)', "!!"),
         # remove hyphen-minus for keywords starting or ending with it
@@ -105,9 +102,16 @@ def clean_keywords(keywords):
     ]
 
 
-def scispacy_tokenizer(text, stopwords=None, additional_stopwords=None, lang="en"):
+def tokenize(text, text_output=False):
     output = ""
-    for line in text.splitlines():
-        doc = NLP(line)
-        output += "!".join(clean_keywords(doc.ents)) + "\n"
-    return output
+    for tokenizer_el in (tokenize_one, tokenize_by_nltk):
+        output += "\n" + tokenizer_el(
+            text
+        )
+    if text_output:
+        return output
+    return [
+        x
+        for x in re.split("\n|\r\n|!", output)
+        if x
+    ]

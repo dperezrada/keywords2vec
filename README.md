@@ -131,7 +131,8 @@ python3 -m nltk.downloader punkt
 
 Let's first use only 30,000 references to train the embeddings:
 ```
-python keywords2vec.py -i data/inputs/episte_title_abstract.tsv.gz --column-numbers=2,3 --additional-stopwords="from,will,vs,versus,from,patient,patients,ci,md" --name="episte_30000" --sample=30000
+mkdir -p /tmp/example
+python keywords2vec.py -i data/inputs/episte_title_abstract.tsv.gz -o /tmp/example --sample=30000
 ```
 
 > Step1: Tokenizing
@@ -149,7 +150,7 @@ python keywords2vec.py -i data/inputs/episte_title_abstract.tsv.gz --column-numb
 ### Try it
 
 ```
-python try_keywords2vec.py -v data/experiments/episte_3000/word2vec.vec -n episte_30000 -p"obesity"
+python try_keywords2vec.py -v /tmp/example/word2vec.vec -c /tmp/example/keywords_counter.tsv.gz -p"obesity" -t 25
 ```
 
 Finding similar keywords for "obesity"

@@ -5,16 +5,10 @@ from collections import Counter
 
 import gensim
 
-from keywords_tokenizer import tokenize_one, scispacy_tokenizer, tokenize_by_nltk
+from keywords_tokenizer import tokenize
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from fastprogress.fastprogress import progress_bar
-from typing import Collection
 
-TOKENIZERS_OPTIONS = {
-    "default": tokenize_one,
-    "scispacy": scispacy_tokenizer,
-    "nltk": tokenize_by_nltk
-}
 
 def main():
     parser = ArgumentParser()
@@ -23,29 +17,24 @@ def main():
         required=True, help="the input text file", metavar="INPUT_FILE"
     )
     parser.add_argument(
-        "-c", "--column-numbers", dest="column_numbers",
-        required=False, help="The text columns of the file. Allowed multiple, separed by comma (starting from 0)",
-        metavar="COLUM_NUMBERS", default="0", type=str
+        "-o", "--output-directory", dest="experiment_path",
+        required=True, help="the target directory for the outputs",
+        metavar="DIRECTORY"
     )
-    parser.add_argument(
-        "-d", "--delimiter", dest="delimiter", required=False,
-        help="the column delimiter", metavar="DELIMITER", default="\t"
-    )
-    parser.add_argument(
-        "-o", "--output-directory", dest="output_directory",
-        required=False, help="the target directory for the outputs",
-        metavar="DIRECTORY", default="data/experiments"
-    )
-    parser.add_argument(
-        "-n", "--name", dest="name",
-        required=False, help="name of the experiment",
-        metavar="NAME", default="experiment_1"
-    )
-    parser.add_argument(
-        "-l", "--lines-chunks", dest="lines_chunks",
-        required=False, help="size of the lines chunks, to use as progress update",
-        metavar="LINES_CHUNKS", default="5000", type=int
-    )
+    # parser.add_argument(
+    #     "-c", "--column-numbers", dest="column_numbers",
+    #     required=False, help="The text columns of the file. Allowed multiple, separed by comma (starting from 0)",
+    #     metavar="COLUM_NUMBERS", default="0", type=str
+    # )
+    # parser.add_argument(
+    #     "-d", "--delimiter", dest="delimiter", required=False,
+    #     help="the column delimiter", metavar="DELIMITER", default="\t"
+    # )
+    # parser.add_argument(
+    #     "-n", "--name", dest="name",
+    #     required=False, help="name of the experiment",
+    #     metavar="NAME", default="experiment_1"
+    # )
     parser.add_argument(
         "-s", "--sample", dest="sample_size",
         required=False,
@@ -58,11 +47,16 @@ def main():
         help="don't print status messages to stdout"
     )
     parser.add_argument(
-        "-a", "--additional-stopwords", dest="additional_stopwords",
-        required=False,
-        help="Stopwords must be separated by comma",
-        metavar="STOPWORDS", default="", type=str
+        "-l", "--lines-chunks", dest="lines_chunks",
+        required=False, help="size of the lines chunks, to use as progress update (-1 auto)",
+        metavar="LINES_CHUNKS", default="-1", type=int
     )
+    # parser.add_argument(
+    #     "-a", "--additional-stopwords", dest="additional_stopwords",
+    #     required=False,
+    #     help="Stopwords must be separated by comma",
+    #     metavar="STOPWORDS", default="", type=str
+    # )
     parser.add_argument(
         "--word2vec_size", dest="word2vec_size",
         required=False,
@@ -93,21 +87,17 @@ def main():
         help="Total numbers of CPU workers",
         metavar="CPU_WORKERS", default="-1", type=int
     )
-    # parser.add_argument(
-    #     "--tokenizers", dest="tokenizers",
-    #     required=False,
-    #     help="List of tokenizers to user options: (default,nltk,scispacy), more than one allowed separated by comma",
-    #     metavar="TOKENIZERS", default="default", type=str
-    # )
 
     args = parser.parse_args()
-    args.experiment_path = os.path.join(args.output_directory, args.name)
     if not os.path.exists(args.experiment_path):
         os.makedirs(args.experiment_path)
-    if args.sample_size > 0 and args.sample_size < args.lines_chunks:
-        args.lines_chunks = args.sample_size
     if args.workers < 0:
         args.workers = num_cpus()
+    if args.lines_chunks == -1:
+        if args.sample_size > 8000:
+            args.lines_chunks = args.sample_size / (10 * args.workers)
+        else:
+            args.lines_chunks = 500
 
     step = 1
     log("Step%s: Tokenizing" % step, args.verbose)
@@ -117,7 +107,6 @@ def main():
     # else:
     #     log("File already exists", args.verbose)
     step += 1
-
 
     log("Step%s: Reading keywords" % step, args.verbose)
     documents_keywords = read_documents(tokenized_path)
@@ -141,7 +130,7 @@ def main():
 
 
 # From fastai
-def parallel(func, arr:Collection, max_workers:int=None):
+def parallel(func, arr, max_workers=None):
     with ProcessPoolExecutor(max_workers=max_workers) as ex:
         futures = [ex.submit(func, o, i) for i, o in enumerate(arr)]
         results = []
@@ -150,27 +139,21 @@ def parallel(func, arr:Collection, max_workers:int=None):
         return results
 
 
-def num_cpus()->int:
-    "Get number of cpus"
+def num_cpus():
+    """Get number of cpus."""
     try:
         return len(os.sched_getaffinity(0))
     except AttributeError:
         return os.cpu_count()
 # end
 
-def tokenize_chunk(text_part, index):
-    output = ""
-    # for tokenizer_el in args.tokenizers:
-    # for tokenizer_el in ("default", "nltk", "scispacy"):
-    for tokenizer_el in ("default", "nltk"):
-        output += "\n" + "," + TOKENIZERS_OPTIONS[tokenizer_el](
-            text_part,
-            # additional_stopwords=args.additional_stopwords.split(",")
-        )
-    return output
+
+def tokenize_chunk(text, index):
+    return tokenize(text, text_output=True)
+
 
 def tokenize_text(args):
-    """This is the parts where we are goint to separate the text, according to the following rules.
+    """We try to separate the text, according to the following rules.
     We are goint to use the stopwords to separate the different expression,
     and in that way identify keywords, as an alternative to use ngrams.
     Example (! is used as separator of the keywords):
@@ -180,7 +163,6 @@ def tokenize_text(args):
         - input: "Acute renal failure (ARF) following cardiac surgery remains a significant cause of mortality. The aim of this study is to compare early and intensive use of continuous veno-venous hemodiafiltration (CVVHDF) with conservative usage of CVVHDF in patients with ARF after cardiac surgery."
         - output: "acute renal failure!arf!following cardiac surgery remains!significant cause!mortality!aim!study!compare early!intensive!continuous veno-venous hemodiafiltration!cvvhdf!conservative usage!cvvhdf!patients!arf!cardiac surgery"
     """
-
     if not args.__contains__("tokenized_path"):
         tokenized_path = os.path.join(args.experiment_path, "tokenized.txt.gz")
     else:
@@ -223,22 +205,13 @@ def chunk_of_text(_file, chunk_size, args):
         line = _file.readline()
         if not line:
             break
-        tmp_text_parts = line.lower()[:-1].split(args.delimiter)
-        selected_text_parts = ". ".join([
-            tmp_text_parts[int(col_numb)] + ". "
-            for col_numb in args.column_numbers.split(",")
-        ])
-        if args.__contains__("key_column") and args.key_column >= 0:
-            yield "%s\t%s" % (tmp_text_parts[args.key_column], selected_text_parts)
-        else:
-            for sentence in selected_text_parts.split("."):
-                if sentence.strip():
-                    yield sentence.strip()
-
-        del tmp_text_parts
+        for sentence in line.split("."):
+            if sentence.strip():
+                yield sentence.strip()
         if index >= chunk_size:
             break
         index += 1
+
 
 def log(line, verbose=True, inline=False):
     end = "\n"
@@ -247,7 +220,8 @@ def log(line, verbose=True, inline=False):
             end = "\r"
         print(line, end=end)
 
-### Read tokenized data
+
+# Read tokenized data
 def read_documents(tokenized_path):
     documents_keywords = []
     index = 0
@@ -256,14 +230,15 @@ def read_documents(tokenized_path):
         index += 1
     return documents_keywords
 
-# ## Calculate words frequency
 
+# Calculate words frequency
 def calculate_keywords_frequency(documents_keywords):
     return Counter([
         keyword
         for keywords in documents_keywords
         for keyword in keywords
     ])
+
 
 def generate_word2vec_model(documents_keywords, args):
     total_documents = len(documents_keywords)
@@ -277,7 +252,8 @@ def generate_word2vec_model(documents_keywords, args):
     )
     return model.wv
 
-## Save the vectors
+
+# Save the vectors
 def save_vectors(keywords_vectors, args):
     store_model_path = os.path.join(args.experiment_path, "word2vec.vec")
     keywords_vectors.save(store_model_path)
