@@ -57,6 +57,13 @@ So we basically split the text when we find:
 
 That's it.
 
+But as there were some problem with some keywords that cointain stopwords, like:
+ * Vitamin A
+ * Hepatitis A
+ * Web of Science
+
+So we decided to add another method (nltk with some grammar definition) to cover most of the cases.
+
 
 ### References
 
@@ -85,15 +92,9 @@ You can try it [here](http://18.212.76.171/episte/) (takes time to load, lowerca
 These embedding were created using 827,341 title/abstract from @epistemonikos database.
 With keywords that repeat at least 10 times. The total vocab is 349,080 keywords (really manageable number)
 
-## Limitations
-
-It's a fact that this method is not perfect. You are going to lose, keywords that cointain stopwords, like:
- * Vitamin A
- * Web of Science
-
-As pointed out by [@peteskomoroch](https://twitter.com/peteskomoroch/status/1094036075247325184) there is other library [AutoPhrase](https://github.com/shangjingbo1226/AutoPhrase) that seem to deal with this (haven't try it yet)
 
 ## Vocab size
+(Need update after including nltk grammar method)
 
 One of the main benefit of this method, is the size of the vocabulary. 
 For example, using keywords that repeat at least 10 times, for the Epistemonikos dataset (827,341 title/abstract), we got the following vocab size:
@@ -187,5 +188,5 @@ Finding similar keywords for "obesity"
 
 You can start a server to play around with the data:
 ```
-FLASK_APP=server/server.py VECTORS_PATH=server/models/episte_all_w10_s150 flask run
+FLASK_APP=server/server.py VECTORS_PATH=/tmp/example/ flask run
 ```
