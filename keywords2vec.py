@@ -252,6 +252,7 @@ def generate_word2vec_model(documents_keywords, args):
         min_count=args.word2vec_count, workers=args.workers
     )
     if args.verbose:
+        import logging
         t = time()
 
         logging.basicConfig(format="%(levelname)s - %(asctime)s: %(message)s", datefmt= '%H:%M:%S', level=logging.INFO)
