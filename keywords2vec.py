@@ -3,11 +3,15 @@ import gzip
 from argparse import ArgumentParser
 from collections import Counter
 
+from time import time  # To time our operations
+
 import gensim
 
 from keywords_tokenizer import tokenize
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from fastprogress.fastprogress import progress_bar
+
+os.system("taskset -p 0xff %d" % os.getpid())
 
 
 def main():
@@ -42,7 +46,7 @@ def main():
         metavar="SIZE", default="-1", type=int
     )
     parser.add_argument(
-        "-q", "--quiet",
+        "-v", "--verbose",
         dest="verbose", default=True,
         help="don't print status messages to stdout"
     )
@@ -67,7 +71,7 @@ def main():
         "--word2vec_window", dest="word2vec_window",
         required=False,
         help="Word2vec window size",
-        metavar="WORD2VEC_WINDOW", default="5", type=int
+        metavar="WORD2VEC_WINDOW", default="3", type=int
     )
     parser.add_argument(
         "--word2vec_count", dest="word2vec_count",
@@ -79,7 +83,7 @@ def main():
         "--word2vec_epochs", dest="word2vec_epochs",
         required=False,
         help="Word2vec epochs number",
-        metavar="WORD2VEC_EPOCHS", default="20", type=int
+        metavar="WORD2VEC_EPOCHS", default="10", type=int
     )
     parser.add_argument(
         "--workers", dest="workers",
@@ -87,6 +91,7 @@ def main():
         help="Total numbers of CPU workers",
         metavar="CPU_WORKERS", default="-1", type=int
     )
+
 
     args = parser.parse_args()
     if not os.path.exists(args.experiment_path):
@@ -246,10 +251,19 @@ def generate_word2vec_model(documents_keywords, args):
         documents_keywords, size=args.word2vec_size, window=args.word2vec_window,
         min_count=args.word2vec_count, workers=args.workers
     )
+    if args.verbose:
+        t = time()
+
+        logging.basicConfig(format="%(levelname)s - %(asctime)s: %(message)s", datefmt= '%H:%M:%S', level=logging.INFO)
+
     model.train(
-        documents_keywords, total_examples=total_documents,
-        epochs=args.word2vec_epochs
+        documents_keywords,
+        total_examples=total_documents,
+        epochs=args.word2vec_epochs,
+        report_delay=1
     )
+    if args.verbose:
+        print('Time to train the model: {} mins'.format(round((time() - t) / 60, 2)))
     return model.wv
 
 
