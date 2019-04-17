@@ -11,8 +11,6 @@ from keywords_tokenizer import tokenize
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from fastprogress.fastprogress import progress_bar
 
-os.system("taskset -p 0xff %d" % os.getpid())
-
 
 def main():
     parser = ArgumentParser()
@@ -91,7 +89,12 @@ def main():
         help="Total numbers of CPU workers",
         metavar="CPU_WORKERS", default="-1", type=int
     )
-
+    parser.add_argument(
+        "--tokenize-only", dest="tokenize_only",
+        required=False,
+        help="If you wanted to only tokenize the text",
+        action='store_true'
+    )
 
     args = parser.parse_args()
     if not os.path.exists(args.experiment_path):
@@ -100,7 +103,7 @@ def main():
         args.workers = num_cpus()
     if args.lines_chunks == -1:
         if args.sample_size > 8000:
-            args.lines_chunks = args.sample_size / (10 * args.workers)
+            args.lines_chunks = args.sample_size / (30 * args.workers)
         else:
             args.lines_chunks = 500
 
@@ -112,6 +115,10 @@ def main():
     # else:
     #     log("File already exists", args.verbose)
     step += 1
+    if args.tokenize_only:
+        print("")
+        print("tokenized_path:", tokenized_path)
+        return
 
     log("Step%s: Reading keywords" % step, args.verbose)
     documents_keywords = read_documents(tokenized_path)
