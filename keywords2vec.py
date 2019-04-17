@@ -183,8 +183,8 @@ def tokenize_text(args):
 
     index = 0
     with gzip.open(tokenized_path, "wt") as _output:
-        print("processing file:", args.input_filename)
         for file_path in glob(args.input_filename):
+            print("processing file:", file_path)
             # We are going to split the text in chunks to show some progress.
             new_index, text_chunks, break_by_sample = get_file_chunks(index, file_path, args.lines_chunks, args)
             index = new_index
