@@ -1,5 +1,6 @@
 import os
 import gzip
+from glob import glob
 from argparse import ArgumentParser
 from collections import Counter
 
@@ -182,11 +183,15 @@ def tokenize_text(args):
 
     index = 0
     with gzip.open(tokenized_path, "wt") as _output:
-        # We are going to split the text in chunks to show some progress.
-        text_chunks = list(get_file_chunks(args.input_filename, args.lines_chunks, args))
-
-        results = parallel(tokenize_chunk, text_chunks, args.workers)
-        _output.write("\n".join(results) + "\n")
+        print("processing file:", args.input_filename)
+        for file_path in glob(args.input_filename):
+            # We are going to split the text in chunks to show some progress.
+            new_index, text_chunks, break_by_sample = get_file_chunks(index, file_path, args.lines_chunks, args)
+            index = new_index
+            results = parallel(tokenize_chunk, text_chunks, args.workers)
+            _output.write("\n".join(results) + "\n")
+            if break_by_sample:
+                break
 
     return tokenized_path
 
@@ -197,18 +202,21 @@ def open_file(filepath, options):
     return open(filepath, options)
 
 
-def get_file_chunks(filepath, lines_chunk, args):
+def get_file_chunks(start_index, filepath, lines_chunk, args):
     _file = open_file(filepath, 'rt')
-    index = 0
+    texts = []
+    break_by_sample = False
     while True:
         next_n_lines = list(chunk_of_text(_file, lines_chunk, args))
-        yield "\n".join(next_n_lines) + "\n"
+        texts.append("\n".join(next_n_lines) + "\n")
         if not next_n_lines:
             break
-        index += lines_chunk
-        if args.sample_size > 0 and index >= args.sample_size:
+        start_index += lines_chunk
+        if args.sample_size > 0 and start_index >= args.sample_size:
+            break_by_sample = True
             break
     _file.close()
+    return (start_index, texts, break_by_sample)
 
 
 def chunk_of_text(_file, chunk_size, args):
@@ -262,7 +270,7 @@ def generate_word2vec_model(documents_keywords, args):
         import logging
         t = time()
 
-        logging.basicConfig(format="%(levelname)s - %(asctime)s: %(message)s", datefmt= '%H:%M:%S', level=logging.INFO)
+        logging.basicConfig(format="%(levelname)s - %(asctime)s: %(message)s", datefmt='%H:%M:%S', level=logging.INFO)
 
     model.train(
         documents_keywords,
