@@ -1,6 +1,0 @@
-gensim
-pandas
-Flask
-nltk
-unidecode
-fastprogress
