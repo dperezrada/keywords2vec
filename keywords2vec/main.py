@@ -13,6 +13,7 @@ import fasttext
 from .utils import parallel, open_file, chunk_of_text, get_file_chunks
 from .tokenizer import tokenize
 
+# Cell
 
 def tokenize_file(
     input_path, output_path="tokenized.txt", lang="en",

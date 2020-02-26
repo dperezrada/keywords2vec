@@ -1,10 +1,5 @@
-# Title
-> summary
-
-
-# Keywords2vec
-
-A simple and fast way to generate a word2vec model, with multi-word keywords instead of single words.
+# keywords2vec
+> A simple and fast way to generate a word2vec model, with multi-word keywords instead of single words.
 
 
 ## Example result

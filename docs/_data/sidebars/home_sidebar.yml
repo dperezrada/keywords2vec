@@ -10,10 +10,13 @@ entries:
       title: Overview
       url: /
     - output: web,pdf
-      title: Keywords2vec
+      title: Tokenizer
       url: /tokenizer
     - output: web,pdf
-      title: Title
+      title: Utils
+      url: /utils
+    - output: web,pdf
+      title: Main
       url: /main
     output: web
     title: keywords2vec

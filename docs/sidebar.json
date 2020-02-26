@@ -1,7 +1,8 @@
 {
   "keywords2vec": {
     "Overview": "/",
-    "Keywords2vec": "/tokenizer",
-    "Title": "/main"
+    "Tokenizer": "/tokenizer",
+    "Utils": "/utils",
+    "Main": "/main"
   }
 }
