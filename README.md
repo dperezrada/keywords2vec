@@ -39,33 +39,20 @@ data_filepath = "epistemonikos_data_sample.tsv.gz"
 !wget "https://s3.amazonaws.com/episte-labs/epistemonikos_data_sample.tsv.gz" -O "{data_filepath}"
 ```
 
-We create the model. If you need the vectors, take a look [here](30_main.ipynb)
+Import
+
+```
+from keywords2vec.main import similars_tree, get_similars
+```
+
+
+We create the model.
 
 ```
 labels, tree = similars_tree(data_filepath)
 ```
 
-    processing file: epistemonikos_data_sample.tsv.gz
-
-
-
-
-<div>
-    <style>
-        /* Turns off some styling */
-        progress {
-            /* gets rid of default border in Firefox and Opera. */
-            border: none;
-            /* Needs to be in here for Safari polyfill so background images work as expected. */
-            background-size: auto;
-        }
-        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-            background: #F44336;
-        }
-    </style>
-  <progress value='201' class='' max='201', style='width:300px; height:20px; vertical-align: middle;'></progress>
-  100.00% [201/201 00:19<00:00]
-</div>
+More info, take a look [here](30_main.ipynb)
 
 
 
